@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obesity Risk &amp; Lifestyle Advisor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F7F7F8;
+      --surface: #FFFFFF;
+      --ink: #111113;
+      --ink-secondary: #52525B;
+      --ink-muted: #71717A;
+      --rule: #E4E4E7;
+      --rule-strong: #111113;
+      --accent: #FF4F00;
+      --accent-ink: #FFFFFF;
+      --good: #15803D;
+      --warn: #B45309;
+      --high: #B91C1C;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Noto Sans Thai', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular { font-variant-numeric: tabular-nums; }
+
+    /* Header */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .topbar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px 24px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand { padding-bottom: 16px; }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--ink-secondary);
+    }
+
+    /* Tabs (modern-web-guidance: aria-selected + border-block-end pseudo-element) */
+    [role="tablist"] {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+    }
+
+    [role="tab"] {
+      position: relative;
+      flex: none;
+      appearance: none;
+      background: transparent;
+      border: 0;
+      padding: 12px 4px 16px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+      cursor: pointer;
+      transition: color 150ms ease;
+    }
+
+    [role="tab"]:hover { color: var(--ink); }
+    [role="tab"]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+    [role="tab"][aria-selected="true"] {
+      color: var(--ink);
+    }
+
+    [role="tab"][aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      border-block-end: 3px solid var(--accent);
+    }
+
+    /* Main Grid */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .predict-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+
+    @media (max-width: 960px) {
+      .predict-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-pane {
+      padding: 24px;
+      border-right: 1px solid var(--rule);
+    }
+
+    @media (max-width: 960px) {
+      .form-pane { border-right: 0; border-bottom: 1px solid var(--rule); }
+    }
+
+    .result-pane {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+    }
+
+    .pane-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .pane-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preset-btn {
+      appearance: none;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      padding: 4px 10px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+      cursor: pointer;
+      transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--surface);
+    }
+
+    /* Form Controls */
+    .form-section {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-section-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .form-section, .form-section-3 { grid-template-columns: 1fr; }
+    }
+
+    .anthro-band {
+      padding: 16px;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 20px;
+    }
+
+    @media (max-width: 640px) {
+      .anthro-band { grid-template-columns: 1fr; }
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+      margin-bottom: 6px;
+    }
+
+    .field label .val {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .field select {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      transition: border-color 150ms ease;
+    }
+
+    .field select:focus {
+      outline: none;
+      border-color: var(--ink);
+    }
+
+    .field input[type="range"] {
+      width: 100%;
+      height: 36px;
+      margin: 0;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .seg {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      height: 36px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+
+    .seg input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
+
+    .seg label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 120ms ease, color 120ms ease;
+    }
+
+    .seg label + input + label,
+    .seg input + label + input + label {
+      border-left: 1px solid var(--rule);
+    }
+
+    .seg input[type="radio"]:checked + label {
+      background: var(--ink);
+      color: var(--accent-ink);
+    }
+
+    .seg input[type="radio"]:focus-visible + label {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 42px;
+      background: var(--ink);
+      color: var(--accent-ink);
+      border: 1px solid var(--ink);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 150ms ease, border-color 150ms ease;
+    }
+
+    .reset-btn {
+      width: 100%;
+      height: 38px;
+      background: var(--bg);
+      color: var(--ink-secondary);
+      border: 1px solid var(--rule);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    }
+
+    .reset-btn:hover {
+      background: var(--surface);
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+
+    .reset-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Result Blocks (1px hairline stacked cells) */
+    .result-block {
+      padding: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .result-block:last-child { border-bottom: 0; }
+
+    .block-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .block-kicker {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+    }
+
+    .block-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .hero-numeral {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 4px 0 12px;
+    }
+
+    .hero-numeral .big {
+      font-size: 44px;
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+
+    .hero-numeral .unit {
+      font-size: 13px;
+      color: var(--ink-muted);
+    }
+
+    /* SVG BMI Ruler */
+    .bmi-ruler { width: 100%; display: block; }
+
+    #bmi-needle {
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #bmi-needle { transition: none; }
+    }
+
+    .verdict-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin: 4px 0 16px;
+    }
+
+    .verdict-title {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .verdict-conf {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+    }
+
+    .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .bar-label { color: var(--ink-secondary); font-weight: 500; }
+    .bar-pct { color: var(--ink); font-weight: 600; }
+
+    .bar-track {
+      height: 6px;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+    }
+
+    .bar-fill {
+      width: 100%;
+      height: 100%;
+      background: var(--ink);
+      transform-origin: left center;
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bar-fill { transition: none; }
+    }
+
+    .bar-fill.accent { background: var(--accent); }
+    .bar-fill.good { background: var(--good); }
+    .bar-fill.warn { background: var(--warn); }
+    .bar-fill.high { background: var(--high); }
+
+    .rec-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 4px 0 2px;
+    }
+
+    .rec-sub {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .rec-detail {
+      margin: 0 0 16px;
+      font-size: 13px;
+      color: var(--ink-secondary);
+    }
+
+    .disclaimer {
+      margin: 16px 0 0;
+      padding-top: 12px;
+      border-top: 1px solid var(--rule);
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+
+    /* Metrics Tab & Responsive Tables (modern-web-guidance: responsive-table) */
+    .metrics-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 24px;
+    }
+
+    .table-card h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .table-card p {
+      margin: 4px 0 16px;
+      font-size: 13px;
+      color: var(--ink-secondary);
+    }
+
+    .table-wrapper {
+      overflow: auto;
+      max-inline-size: 100%;
+      container-type: inline-size;
+      border: 1px solid var(--rule);
+    }
+
+    .table-wrapper:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    caption {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    thead {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 1;
+      background: var(--bg);
+    }
+
+    th, td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--rule);
+      white-space: nowrap;
+    }
+
+    thead th {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      border-bottom: 1px solid var(--rule-strong);
+    }
+
+    tbody th {
+      position: sticky;
+      inset-inline-start: 0;
+      background: var(--surface);
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    tbody tr.best-row th,
+    tbody tr.best-row td {
+      background: #FFF7F3;
+      font-weight: 600;
+    }
+
+    tbody tr:last-child th,
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .charts-2col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-2col { grid-template-columns: 1fr; }
+    }
+
+    .subchart-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 0 0 12px;
+    }
+
+    .cm-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .cm-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .cm-box {
+      border: 1px solid var(--rule);
+      padding: 16px;
+      background: var(--bg);
+    }
+
+    .cm-box h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .cm-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: var(--surface);
+    }
+
+    .cm-table th, .cm-table td {
+      border: 1px solid var(--rule);
+      padding: 8px 6px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .cm-table thead th {
+      background: var(--bg);
+      color: var(--ink-secondary);
+      font-weight: 600;
+    }
+
+    .cm-table tbody th {
+      position: static;
+      background: var(--bg);
+      color: var(--ink-secondary);
+      font-weight: 600;
+      text-align: left;
+      padding-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <h1>Obesity Risk &amp; Lifestyle</h1>
+        <p>ทำนายความเสี่ยงโรคอ้วนจากพฤติกรรม (ไม่ใช้น้ำหนัก-ส่วนสูง) และแนวทางดูแลเบื้องต้น</p>
+      </div>
+      <div role="tablist" aria-label="มุมมองการทำงาน">
+        <button type="button" role="tab" id="tab-predict-btn" aria-selected="true">ประเมินผล</button>
+        <button type="button" role="tab" id="tab-metrics-btn" aria-selected="false">ผลเทียบโมเดล</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Panel 1: Prediction -->
+    <div role="tabpanel" id="panel-predict" aria-labelledby="tab-predict-btn">
+      <div class="predict-grid">
+        <div class="form-pane">
+          <div class="pane-head">
+            <span class="pane-title">ข้อมูลพื้นฐานและพฤติกรรม (อายุ 20 ปีขึ้นไป)</span>
+            <div class="presets">
+              <button type="button" class="preset-btn" onclick="applyPreset('fit')">สุขภาพดี</button>
+              <button type="button" class="preset-btn" onclick="applyPreset('under')">น้ำหนักน้อย</button>
+              <button type="button" class="preset-btn" onclick="applyPreset('risk')">เสี่ยงสูง</button>
+            </div>
+          </div>
+
+          <form id="predict-form">
+            <div class="form-section-3">
+              <div class="field">
+                <label id="lbl-Gender">เพศ</label>
+                <div class="seg" role="group" aria-labelledby="lbl-Gender">
+                  <input type="radio" name="Gender" id="Gender-Male" value="Male" checked />
+                  <label for="Gender-Male">ชาย</label>
+                  <input type="radio" name="Gender" id="Gender-Female" value="Female" />
+                  <label for="Gender-Female">หญิง</label>
+                </div>
+              </div>
+              <div class="field">
+                <label for="Age">อายุ <span id="Age-val" class="val tabular">24 ปี</span></label>
+                <input id="Age" type="range" min="20" max="65" value="24" oninput="document.getElementById('Age-val').textContent=this.value+' ปี'" />
+              </div>
+              <div class="field">
+                <label id="lbl-fam">คนในครอบครัวเคยอ้วน</label>
+                <div class="seg" role="group" aria-labelledby="lbl-fam">
+                  <input type="radio" name="family_history_with_overweight" id="fam-yes" value="yes" checked />
+                  <label for="fam-yes">มี</label>
+                  <input type="radio" name="family_history_with_overweight" id="fam-no" value="no" />
+                  <label for="fam-no">ไม่มี</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="anthro-band">
+              <div class="field">
+                <label for="Weight">น้ำหนัก <span id="Weight-val" class="val tabular">70 กก.</span></label>
+                <input id="Weight" type="range" min="35" max="180" value="70" oninput="document.getElementById('Weight-val').textContent=this.value+' กก.'" />
+              </div>
+              <div class="field">
+                <label for="HeightCm">ส่วนสูง <span id="HeightCm-val" class="val tabular">170 ซม.</span></label>
+                <input id="HeightCm" type="range" min="140" max="205" value="170" oninput="document.getElementById('HeightCm-val').textContent=this.value+' ซม.'" />
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="field">
+                <label id="lbl-FAVC">กินอาหารแคลอรีสูงบ่อยไหม</label>
+                <div class="seg" role="group" aria-labelledby="lbl-FAVC">
+                  <input type="radio" name="FAVC" id="FAVC-yes" value="yes" checked />
+                  <label for="FAVC-yes">บ่อย</label>
+                  <input type="radio" name="FAVC" id="FAVC-no" value="no" />
+                  <label for="FAVC-no">ไม่บ่อย</label>
+                </div>
+              </div>
+              <div class="field">
+                <label for="FCVC">การกินผัก</label>
+                <select id="FCVC">
+                  <option value="1">น้อยมาก / แทบไม่กิน</option>
+                  <option value="2" selected>กินบางมื้อ</option>
+                  <option value="3">กินเกือบทุกมื้อ</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="NCP">จำนวนมื้อหลักต่อวัน <span id="NCP-val" class="val tabular">3 มื้อ</span></label>
+                <input id="NCP" type="range" min="1" max="4" step="1" value="3" oninput="document.getElementById('NCP-val').textContent=this.value+' มื้อ'" />
+              </div>
+              <div class="field">
+                <label for="CAEC">กินจุกจิกระหว่างมื้อ</label>
+                <select id="CAEC">
+                  <option value="no">ไม่เลย</option>
+                  <option value="Sometimes" selected>บางครั้ง</option>
+                  <option value="Frequently">บ่อยครั้ง</option>
+                  <option value="Always">ประจำ</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="CH2O">ดื่มน้ำต่อวัน</label>
+                <select id="CH2O">
+                  <option value="1">น้อยกว่า 1 ลิตร</option>
+                  <option value="2" selected>1 - 2 ลิตร</option>
+                  <option value="3">มากกว่า 2 ลิตร</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="FAF">ออกกำลังกาย</label>
+                <select id="FAF">
+                  <option value="0">ไม่ออกกำลังกาย</option>
+                  <option value="1" selected>1 - 2 วัน/สัปดาห์</option>
+                  <option value="2">2 - 4 วัน/สัปดาห์</option>
+                  <option value="3">4 - 5+ วัน/สัปดาห์</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="TUE">เวลาหน้าจอต่อวัน</label>
+                <select id="TUE">
+                  <option value="0">0 - 2 ชั่วโมง/วัน</option>
+                  <option value="1" selected>3 - 5 ชั่วโมง/วัน</option>
+                  <option value="2">มากกว่า 5 ชั่วโมง/วัน</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="MTRANS">การเดินทางหลัก</label>
+                <select id="MTRANS">
+                  <option value="Public_Transportation" selected>ขนส่งสาธารณะ</option>
+                  <option value="Automobile">รถยนต์ส่วนตัว</option>
+                  <option value="Walking">เดิน</option>
+                  <option value="Motorbike">รถจักรยานยนต์</option>
+                  <option value="Bike">จักรยาน</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="CALC">ดื่มแอลกอฮอล์</label>
+                <select id="CALC">
+                  <option value="no">ไม่เลย</option>
+                  <option value="Sometimes" selected>บางครั้ง</option>
+                  <option value="Frequently">บ่อยครั้ง</option>
+                  <option value="Always">ประจำ</option>
+                </select>
+              </div>
+              <div class="form-section" style="margin-bottom:0; gap:12px;">
+                <div class="field">
+                  <label id="lbl-SMOKE">สูบบุหรี่</label>
+                  <div class="seg" role="group" aria-labelledby="lbl-SMOKE">
+                    <input type="radio" name="SMOKE" id="SMOKE-no" value="no" checked />
+                    <label for="SMOKE-no">ไม่สูบ</label>
+                    <input type="radio" name="SMOKE" id="SMOKE-yes" value="yes" />
+                    <label for="SMOKE-yes">สูบ</label>
+                  </div>
+                </div>
+                <div class="field">
+                  <label id="lbl-SCC">นับแคลอรี</label>
+                  <div class="seg" role="group" aria-labelledby="lbl-SCC">
+                    <input type="radio" name="SCC" id="SCC-no" value="no" checked />
+                    <label for="SCC-no">ไม่นับ</label>
+                    <input type="radio" name="SCC" id="SCC-yes" value="yes" />
+                    <label for="SCC-yes">นับ</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" id="reset-btn" class="reset-btn">รีเซ็ตค่าเริ่มต้น</button>
+          </form>
+        </div>
+
+        <div class="result-pane">
+          <!-- BMI Ruler -->
+          <div class="result-block">
+            <div class="block-meta">
+              <span class="block-kicker">BMI</span>
+              <span id="bmi-badge" class="block-tag">-</span>
+            </div>
+            <div class="hero-numeral">
+              <span id="bmi-value" class="big tabular">-</span>
+              <span class="unit">kg/m²</span>
+            </div>
+            <svg class="bmi-ruler" viewBox="0 0 400 36" aria-label="สเกล BMI 15 ถึง 40">
+              <rect x="0" y="10" width="56" height="6" fill="#D4D4D8" />
+              <rect x="57" y="10" width="103" height="6" fill="#A1A1AA" />
+              <rect x="161" y="10" width="79" height="6" fill="#71717A" />
+              <rect x="241" y="10" width="159" height="6" fill="#18181B" />
+              <line id="bmi-needle" x1="0" y1="2" x2="0" y2="22" stroke="#FF4F00" stroke-width="2.5" style="transform: translateX(150px);" />
+              <text x="0" y="34" font-size="10" fill="#71717A">15</text>
+              <text x="52" y="34" font-size="10" fill="#71717A">18.5</text>
+              <text x="155" y="34" font-size="10" fill="#71717A">25</text>
+              <text x="236" y="34" font-size="10" fill="#71717A">30</text>
+              <text x="386" y="34" font-size="10" fill="#71717A">40</text>
+            </svg>
+          </div>
+
+          <!-- Model 1 -->
+          <div class="result-block">
+            <div class="block-meta">
+              <span class="block-kicker">Model 1 · ประเมินจากพฤติกรรม</span>
+              <span id="ml1-model-name" class="block-tag tabular">LightGBM</span>
+            </div>
+            <div class="verdict-row">
+              <span id="ml1-pred" class="verdict-title">-</span>
+              <span id="ml1-conf" class="verdict-conf tabular">-</span>
+            </div>
+            <div id="ml1-bars" class="bars"></div>
+          </div>
+
+          <!-- Model 2 -->
+          <div class="result-block">
+            <div class="block-meta">
+              <span class="block-kicker">Model 2 · แนวทางที่แนะนำ</span>
+              <span id="ml2-model-name" class="block-tag tabular">DecisionTree</span>
+            </div>
+            <div id="ml2-pred" class="rec-title">-</div>
+            <div id="ml2-title-th" class="rec-sub">-</div>
+            <p id="ml2-detail-th" class="rec-detail">-</p>
+            <div id="ml2-bars" class="bars"></div>
+            <p class="disclaimer">* สำหรับสาธิตโมเดลเท่านั้น ไม่ใช่การวินิจฉัยทางการแพทย์</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Metrics (hidden by default; modern-web-guidance: hidden on inactive panels) -->
+    <div role="tabpanel" id="panel-metrics" aria-labelledby="tab-metrics-btn" hidden>
+      <div class="metrics-stack">
+        <div class="table-card">
+          <h2>Model 1: ทำนายความเสี่ยง (14 ฟีเจอร์พฤติกรรม)</h2>
+          <p>เทียบกับ Baseline บนข้อมูล UCI Obesity (Train 1,669 / Test 418 แถว)</p>
+          <div tabindex="0" role="region" aria-labelledby="ml1-caption" class="table-wrapper">
+            <table>
+              <caption id="ml1-caption">ผลประเมิน Model 1</caption>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Train F1</th>
+                  <th>5-Fold CV F1</th>
+                  <th>Test F1</th>
+                  <th>Test Acc</th>
+                  <th>Δ F1 vs Baseline</th>
+                </tr>
+              </thead>
+              <tbody id="ml1-table-body" class="tabular"></tbody>
+            </table>
+          </div>
+
+          <div class="charts-2col">
+            <div class="cm-box" style="background:var(--surface);">
+              <h3 class="subchart-title">เปรียบเทียบ Macro-F1 (Train / 5-Fold CV / Test)</h3>
+              <svg id="ml1-f1-svg" viewBox="0 0 520 220" style="width:100%; height:auto; display:block;"></svg>
+            </div>
+            <div class="cm-box" style="background:var(--surface);">
+              <h3 class="subchart-title">Top 8 ปัจจัยที่มีผลสูงสุด (LightGBM)</h3>
+              <div id="ml1-feat-bars" class="bars"></div>
+            </div>
+          </div>
+
+          <div id="ml1-cm-grid" class="cm-grid-3"></div>
+        </div>
+
+        <div class="table-card">
+          <h2>Model 2: ทำนายแนวทางดูแล 5 กลุ่ม</h2>
+          <p>ฝึกบนข้อมูลอายุ 20 ปีขึ้นไป (BMI + ผลจาก Model 1 + พฤติกรรม)</p>
+          <div tabindex="0" role="region" aria-labelledby="ml2-caption" class="table-wrapper">
+            <table>
+              <caption id="ml2-caption">ผลประเมิน Model 2</caption>
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>CV Macro-F1</th>
+                  <th>Test Accuracy</th>
+                  <th>Test Macro-F1</th>
+                </tr>
+              </thead>
+              <tbody id="ml2-table-body" class="tabular"></tbody>
+            </table>
+          </div>
+          <div id="ml2-cm-box" style="margin-top:24px;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const PRESETS = {
+      fit: { Gender: 'Female', Age: 23, Weight: 55, HeightCm: 163, family_history_with_overweight: 'yes', FAVC: 'no', FCVC: '3', NCP: 3, CAEC: 'no', SMOKE: 'no', CH2O: '2', SCC: 'yes', FAF: '2', TUE: '1', CALC: 'no', MTRANS: 'Public_Transportation' },
+      under: { Gender: 'Female', Age: 23, Weight: 43, HeightCm: 160, family_history_with_overweight: 'no', FAVC: 'no', FCVC: '3', NCP: 3, CAEC: 'Frequently', SMOKE: 'no', CH2O: '2', SCC: 'no', FAF: '2', TUE: '0', CALC: 'no', MTRANS: 'Public_Transportation' },
+      risk: { Gender: 'Male', Age: 26, Weight: 108, HeightCm: 181, family_history_with_overweight: 'yes', FAVC: 'yes', FCVC: '3', NCP: 3, CAEC: 'Sometimes', SMOKE: 'no', CH2O: '3', SCC: 'no', FAF: '0', TUE: '0', CALC: 'Sometimes', MTRANS: 'Public_Transportation' },
+    };
+
+    const tabs = [
+      { btn: document.getElementById('tab-predict-btn'), panel: document.getElementById('panel-predict') },
+      { btn: document.getElementById('tab-metrics-btn'), panel: document.getElementById('panel-metrics') },
+    ];
+
+    function activateTab(idx) {
+      tabs.forEach((t, i) => {
+        const selected = i === idx;
+        t.btn.setAttribute('aria-selected', String(selected));
+        t.panel.hidden = !selected;
+      });
+    }
+
+    tabs.forEach((t, i) => {
+      t.btn.addEventListener('click', () => activateTab(i));
+      t.btn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); const n = (i + 1) % tabs.length; activateTab(n); tabs[n].btn.focus(); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); const p = (i - 1 + tabs.length) % tabs.length; activateTab(p); tabs[p].btn.focus(); }
+      });
+    });
+
+    function getVal(name) {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      if (checked) return checked.value;
+      const el = document.getElementById(name);
+      return el ? el.value : '';
+    }
+
+    const DEFAULT_FORM = {
+      Gender: 'Male', Age: 24, Weight: 70, HeightCm: 170,
+      family_history_with_overweight: 'yes', FAVC: 'yes', FCVC: '2', NCP: 3,
+      CAEC: 'Sometimes', SMOKE: 'no', CH2O: '2', SCC: 'no', FAF: '1', TUE: '1',
+      CALC: 'Sometimes', MTRANS: 'Public_Transportation',
+    };
+
+    function applyValues(values) {
+      const suffixes = { Age: ' ปี', Weight: ' กก.', HeightCm: ' ซม.', NCP: ' มื้อ' };
+      for (const [k, v] of Object.entries(values)) {
+        const radio = document.querySelector(`input[name="${k}"][value="${v}"]`);
+        if (radio) {
+          radio.checked = true;
+        } else {
+          const el = document.getElementById(k);
+          if (el) el.value = v;
+        }
+        const valEl = document.getElementById(k + '-val');
+        if (valEl) valEl.textContent = v + (suffixes[k] || '');
+      }
+      runPredict();
+    }
+
+    function applyPreset(key) {
+      applyValues(PRESETS[key]);
+    }
+
+    function renderBars(containerId, probs, classFn, fixedOrder = null) {
+      const el = document.getElementById(containerId);
+      const keys = fixedOrder || Object.keys(probs).sort();
+      if (!el.dataset.init) {
+        el.dataset.init = '1';
+        el.innerHTML = keys.map(label => `
+          <div data-key="${label}">
+            <div class="bar-head">
+              <span class="bar-label">${label}</span>
+              <span class="bar-pct tabular">0.0%</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill ${classFn(label)}" style="transform: scaleX(0)"></div>
+            </div>
+          </div>
+        `).join('');
+      }
+      for (const label of keys) {
+        const pct = probs[label] ?? 0;
+        const row = el.querySelector(`[data-key="${label}"]`);
+        if (!row) continue;
+        row.querySelector('.bar-pct').textContent = `${pct.toFixed(1)}%`;
+        const fill = row.querySelector('.bar-fill');
+        fill.className = `bar-fill ${classFn(label)}`;
+        fill.style.transform = `scaleX(${(pct / 100).toFixed(4)})`;
+      }
+    }
+
+    async function runPredict(e) {
+      if (e) e.preventDefault();
+      const payload = {
+        Gender: getVal('Gender'),
+        Age: Number(getVal('Age')),
+        Weight: Number(getVal('Weight')),
+        HeightCm: Number(getVal('HeightCm')),
+        family_history_with_overweight: getVal('family_history_with_overweight'),
+        FAVC: getVal('FAVC'),
+        FCVC: Number(getVal('FCVC')),
+        NCP: Number(getVal('NCP')),
+        CAEC: getVal('CAEC'),
+        SMOKE: getVal('SMOKE'),
+        CH2O: Number(getVal('CH2O')),
+        SCC: getVal('SCC'),
+        FAF: Number(getVal('FAF')),
+        TUE: Number(getVal('TUE')),
+        CALC: getVal('CALC'),
+        MTRANS: getVal('MTRANS'),
+      };
+
+      const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      document.getElementById('bmi-value').textContent = data.bmi.toFixed(1);
+      document.getElementById('bmi-badge').textContent = data.bmi_label;
+      const clampedBmi = Math.max(15, Math.min(40, data.bmi));
+      const xPos = ((clampedBmi - 15) / 25) * 400;
+      const needle = document.getElementById('bmi-needle');
+      needle.style.transform = `translateX(${xPos.toFixed(1)}px)`;
+
+      const riskTh = { Low: 'ความเสี่ยงต่ำ', Medium: 'ความเสี่ยงปานกลาง', High: 'ความเสี่ยงสูง' };
+      document.getElementById('ml1-model-name').textContent = data.ml1.model;
+      document.getElementById('ml1-pred').textContent = riskTh[data.ml1.prediction] || data.ml1.prediction;
+      document.getElementById('ml1-conf').textContent = `${data.ml1.confidence}%`;
+      renderBars('ml1-bars', data.ml1.probs, (lbl) =>
+        lbl === 'High' ? 'high' : lbl === 'Medium' ? 'warn' : 'good',
+        ['Low', 'Medium', 'High']
+      );
+
+      document.getElementById('ml2-model-name').textContent = data.ml2.model;
+      document.getElementById('ml2-pred').textContent = data.ml2.prediction;
+      document.getElementById('ml2-title-th').textContent = data.ml2.title_th;
+      document.getElementById('ml2-detail-th').textContent = data.ml2.detail_th;
+      renderBars('ml2-bars', data.ml2.probs, (lbl) => lbl === data.ml2.prediction ? 'accent' : '');
+    }
+
+    async function loadMetrics() {
+      const res = await fetch('/api/metrics');
+      const data = await res.json();
+      document.getElementById('ml1-table-body').innerHTML = data.ml1_results.map(r => `
+        <tr class="${r.Model === data.ml1_best ? 'best-row' : ''}">
+          <th>${r.Model}</th>
+          <td>${r['Train F1'].toFixed(4)}</td>
+          <td>${r['CV F1'].toFixed(4)}</td>
+          <td>${r['Test F1'].toFixed(4)}</td>
+          <td>${r['Test Acc'].toFixed(4)}</td>
+          <td>+${r['Δ F1 vs Baseline'].toFixed(4)}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('ml2-table-body').innerHTML = data.ml2_results.map(r => `
+        <tr class="${r.Model === data.ml2_best ? 'best-row' : ''}">
+          <th>${r.Model}</th>
+          <td>${r['CV Macro-F1'].toFixed(4)}</td>
+          <td>${r['Test Accuracy'].toFixed(4)}</td>
+          <td>${r['Test Macro-F1'].toFixed(4)}</td>
+        </tr>
+      `).join('');
+
+      renderF1Chart(data.ml1_results);
+      renderFeatureBars(data.ml1_top_features || []);
+      renderMl1Cms(data.ml1_cms || {}, data.ml1_class_names || [], data.ml1_results);
+      renderSingleCm('ml2-cm-box', `Confusion Matrix — ${data.ml2_best} (Test Set)`, data.ml2_cm || [], data.ml2_labels || []);
+    }
+
+    function renderF1Chart(rows) {
+      const svg = document.getElementById('ml1-f1-svg');
+      if (!svg || !rows.length) return;
+      const chartH = 160;
+      const topPad = 18;
+      const leftPad = 36;
+      const groupW = 116;
+      const barW = 24;
+      const shortNames = { 'Baseline (Majority)': 'Baseline', 'LogisticRegression': 'LogReg', 'RandomForest': 'RandomForest', 'LightGBM': 'LightGBM' };
+
+      let html = '';
+      [0, 0.25, 0.5, 0.75, 1.0].forEach(v => {
+        const y = topPad + chartH * (1 - v);
+        html += `<line x1="${leftPad}" y1="${y}" x2="505" y2="${y}" stroke="#E4E4E7" stroke-width="1" />`;
+        html += `<text x="${leftPad - 6}" y="${y + 3}" text-anchor="end" font-size="10" fill="#71717A">${v.toFixed(2)}</text>`;
+      });
+
+      rows.forEach((r, idx) => {
+        const gx = leftPad + 14 + idx * groupW;
+        const vals = [
+          { v: r['Train F1'], c: '#D4D4D8' },
+          { v: r['CV F1'], c: '#71717A' },
+          { v: r['Test F1'], c: r.Model === 'LightGBM' ? '#FF4F00' : '#111113' },
+        ];
+        vals.forEach((item, j) => {
+          const bh = item.v * chartH;
+          const x = gx + j * (barW + 4);
+          const y = topPad + chartH - bh;
+          html += `<rect x="${x}" y="${y}" width="${barW}" height="${bh}" fill="${item.c}" />`;
+          if (j === 2) {
+            html += `<text x="${x + barW / 2}" y="${y - 4}" text-anchor="middle" font-size="10" font-weight="600" fill="#111113">${item.v.toFixed(3)}</text>`;
+          }
+        });
+        html += `<text x="${gx + 40}" y="${topPad + chartH + 16}" text-anchor="middle" font-size="11" fill="#52525B">${shortNames[r.Model] || r.Model}</text>`;
+      });
+
+      html += `
+        <rect x="330" y="2" width="10" height="10" fill="#D4D4D8" /><text x="344" y="11" font-size="10" fill="#52525B">Train</text>
+        <rect x="382" y="2" width="10" height="10" fill="#71717A" /><text x="396" y="11" font-size="10" fill="#52525B">CV</text>
+        <rect x="424" y="2" width="10" height="10" fill="#111113" /><text x="438" y="11" font-size="10" fill="#52525B">Test</text>
+        <rect x="470" y="2" width="10" height="10" fill="#FF4F00" /><text x="484" y="11" font-size="10" fill="#52525B">Best</text>
+      `;
+      svg.innerHTML = html;
+    }
+
+    function renderFeatureBars(items) {
+      const box = document.getElementById('ml1-feat-bars');
+      if (!box || !items.length) return;
+      const top8 = items.slice(0, 8);
+      const maxImp = Math.max(...top8.map(d => d.importance), 1);
+      box.innerHTML = top8.map((d, i) => {
+        const pct = (d.importance / maxImp) * 100;
+        return `
+          <div>
+            <div class="bar-head">
+              <span class="bar-label">${d.feature}</span>
+              <span class="bar-pct tabular">${Math.round(d.importance)}</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill ${i === 0 ? 'accent' : ''}" style="transform: scaleX(${(pct / 100).toFixed(4)})"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function buildCmHtml(title, matrix, labels) {
+      const maxVal = Math.max(...matrix.flat(), 1);
+      const header = labels.map(l => `<th>Pred: ${l}</th>`).join('');
+      const body = matrix.map((row, i) => {
+        const cells = row.map((val, j) => {
+          const ratio = val / maxVal;
+          const isDiag = i === j;
+          const bg = isDiag
+            ? `rgba(255, 79, 0, ${(0.12 + ratio * 0.65).toFixed(2)})`
+            : `rgba(17, 17, 19, ${(ratio * 0.18).toFixed(2)})`;
+          const color = isDiag && ratio > 0.55 ? '#FFFFFF' : '#111113';
+          return `<td class="tabular" style="background:${bg}; color:${color}; font-weight:${isDiag ? '600' : '400'};">${val}</td>`;
+        }).join('');
+        return `<tr><th>Actual: ${labels[i]}</th>${cells}</tr>`;
+      }).join('');
+      return `
+        <div class="cm-box">
+          <h3>${title}</h3>
+          <div style="overflow-x:auto;">
+            <table class="cm-table">
+              <thead><tr><th></th>${header}</tr></thead>
+              <tbody>${body}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMl1Cms(cms, labels, results) {
+      const grid = document.getElementById('ml1-cm-grid');
+      if (!grid) return;
+      grid.innerHTML = ['LogisticRegression', 'RandomForest', 'LightGBM'].map(m => {
+        const row = results.find(r => r.Model === m);
+        const f1 = row ? ` (Test F1 = ${row['Test F1'].toFixed(3)})` : '';
+        return buildCmHtml(`${m}${f1}`, cms[m] || [], labels);
+      }).join('');
+    }
+
+    function renderSingleCm(elId, title, matrix, labels) {
+      const box = document.getElementById(elId);
+      if (!box || !matrix.length) return;
+      box.innerHTML = buildCmHtml(title, matrix, labels);
+    }
+
+    let predictTimer = null;
+    function schedulePredict() {
+      clearTimeout(predictTimer);
+      predictTimer = setTimeout(() => runPredict(), 80);
+    }
+
+    const formEl = document.getElementById('predict-form');
+    formEl.addEventListener('submit', runPredict);
+    document.getElementById('reset-btn').addEventListener('click', () => applyValues(DEFAULT_FORM));
+    formEl.querySelectorAll('select, input[type="radio"]').forEach(el => {
+      el.addEventListener('change', () => runPredict());
+    });
+    formEl.querySelectorAll('input[type="range"]').forEach(el => {
+      el.addEventListener('input', schedulePredict);
+      el.addEventListener('change', () => runPredict());
+    });
+    loadMetrics();
+    runPredict();
+  </script>
+</body>
+</html>
